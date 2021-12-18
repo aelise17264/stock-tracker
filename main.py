@@ -1,4 +1,5 @@
 import requests
+import smtplib
 
 STOCK_NAME = "TSLA"
 COMPANY_NAME = "Tesla Inc"
@@ -8,6 +9,9 @@ NEWS_ENDPOINT = "https://newsapi.org/v2/everything"
 
 STOCK_API_KEY = "J76WJUB9S0VLF77M"
 NEWS_API_KEY = "0551206a22704f29ac4f5355199f3d06"
+
+MY_EMAIL = "abrander2019@yahoo.com"
+MY_PASSWORD = "wmpjyplzixsvrqfe"
 
     ## STEP 1: Use https://www.alphavantage.co/documentation/#daily
 # When stock price increase/decreases by 5% between yesterday and the day before yesterday then print("Get News").
@@ -41,8 +45,10 @@ diff_percent = round((difference / float(yesterday_closing_price) * 100), 2)
 
 #TODO 5. - If TODO4 percentage is greater than 5 then print("Get News").
 if diff_percent > 5:
+    arrow = "🔺"
     print("Get News!")
 else:
+    arrow = "🔻"
     print("Not much to report")
 
     ## STEP 2: https://newsapi.org/
@@ -60,15 +66,25 @@ articles = news_response.json()["articles"]
 
 #TODO 7. - Use Python slice operator to create a list that contains the first 3 articles. Hint: https://stackoverflow.com/questions/509211/understanding-slice-notation
 three_articles = articles[:3]
-print(three_articles)
+# print(three_articles)
 
     ## STEP 3: Use twilio.com/docs/sms/quickstart/python
     #to send a separate message with each article's title and description to your phone number.
 
 #TODO 8. - Create a new list of the first 3 article's headline and description using list comprehension.
+headlines = [f"{STOCK_NAME}: {arrow}{diff_percent}% \nHeadline: {article['title']}.\nBrief: {article['description']}" for article in three_articles]
+# print(headlines)
 
 #TODO 9. - Send each article as a separate message via Twilio.
+for article in three_articles:
+    title = article['title'].encode('ascii', 'ignore')
+    description = article['description'].encode('ascii', 'ignore')
 
+    with smtplib.SMTP("smtp.mail.yahoo.com", 587) as connection:
+        connection.starttls()
+        connection.login(user=MY_EMAIL, password=MY_PASSWORD)
+        connection.sendmail(from_addr=MY_EMAIL, to_addrs=MY_EMAIL,
+                            msg=f"Subject: {title}\n\n{description}")
 
 
 #Optional TODO: Format the message like this:
